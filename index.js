@@ -11,9 +11,13 @@
 const Moa = require('./moa')
 const app = new Moa()
 
-app.use((req, res) => {
-  res.writeHeader(200)
-  res.end('hello, Moa')
+// app.use((req, res) => {
+//   res.writeHeader(200)
+//   res.end('hello, Moa')
+// })
+
+app.use(ctx => {
+  ctx.body = 'Cool, Moa'
 })
 
 app.listen(3000, () => {
