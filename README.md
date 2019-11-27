@@ -117,7 +117,7 @@ module.exports = {
 }
 ```
 
-接着我们需要给 *Moa* 这个类添加一个 `createContext(req, res)` 的方法：
+接着我们需要给 *Moa* 这个类添加一个 `createContext(req, res)` 的方法, 并在 `listen()` 方法中适当的地方挂载上：
 
 ```js
 // moa.js
@@ -129,6 +129,19 @@ const response = require('./response')
 
 class Moa {
   // ...
+  listen(...args) {
+    const server = http.createServer((req, res) => {
+      // 创建上下文
+      const ctx = this.createContext(req, res)
+
+      this.callback(ctx)
+
+      // 响应
+      res.end(ctx.body)
+    })
+    server.listen(...args)
+  }
+
   createContext(req, res) {
     const ctx = Object.create(context)
     ctx.request = Object.create(request)
