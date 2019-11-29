@@ -5,14 +5,19 @@ const request = require('./request')
 const response = require('./response')
 
 class Moa {
-  use(callback) {
-    this.callback = callback
+  constructor() {
+    this.middlewares = []
+  }
+
+  use(middleware) {
+    this.middlewares.push(middleware)
   }
   listen(...args) {
-    const server = http.createServer((req, res) => {
+    const server = http.createServer(async (req, res) => {
       // 创建上下文
       const ctx = this.createContext(req, res)
-      this.callback(ctx)
+      const fn = this.compose(this.middlewares)
+      await fn(ctx)
       // 响应
       res.end(ctx.body)
     })
@@ -28,6 +33,23 @@ class Moa {
     ctx.req = ctx.request = req
     ctx.res = ctx.response = res
     return ctx
+  }
+
+  compose(middlewares) {
+    return function (ctx) {
+      return dispatch(0)
+      function dispatch(i) {
+        let fn = middlewares[i]
+        if (!fn) {
+          return Promise.resolve()
+        }
+        return Promise.resolve(
+          fn(ctx, function () {
+            return dispatch(i + 1)
+          })
+        )
+      }
+    }
   }
 }
 
