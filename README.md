@@ -239,3 +239,90 @@ fn2 end
 fn3
 fn3 end
 ```
+
+### 异步函数组合
+
+了解了同步的函数组合后，我们在中间件中的实际场景其实都是异步的，所以我们接着来研究下异步函数组合是如何进行的，首先我们改造一下刚才的同步函数，使他们变成异步函数, 
+
+```js
+// compose_test.js
+async function fn1(next) {
+  console.log('fn1')
+  next && await next()
+  console.log('fn1 end')
+}
+
+async function fn2(next) {
+  console.log('fn2')
+  next && await next()
+  console.log('fn2 end')
+}
+
+async function fn3(next) {
+  console.log('fn3')
+  next && await next()
+  console.log('fn3 end')
+}
+//...
+```
+
+现在我们期望的输出结果是这样的:
+
+```bash
+fn1
+fn2
+fn3
+fn3 end
+fn2 end
+fn1 end
+```
+同时我们希望编写代码的方式也不要改变, 
+
+```js
+// compose_test.js
+// ...
+const middlewares = [fn1, fn2, fn3]
+const finalFn = compose(middlewares)
+finalFn()
+```
+
+所以我们只需要改造一下 `compose()` 函数，使他支持异步函数就即可:
+
+// compose_test.js
+// ...
+
+function compose(middlewares) {
+  return function () {
+    return dispatch(0)
+    function dispatch(i) {
+      let fn = middlewares[i]
+      if (!fn) {
+        return Promise.resolve()
+      }
+      return Promise.resolve(
+        fn(function next() {
+          return dispatch(i + 1)
+        })
+      )
+    }
+  }
+}
+
+const middlewares = [fn1, fn2, fn3]
+const finalFn = compose(middlewares)
+finalFn()
+```
+
+运行结果：
+
+```bash
+fn1
+fn2
+fn3
+fn3 end
+fn2 end
+fn1 end
+```
+
+完美！！！
+
