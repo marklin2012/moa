@@ -153,3 +153,89 @@ class Moa {
 }
 
 ```
+
+### 中间件
+
+*Koa* 中间键机制：*Koa* 中间件机制就是函数组合的概念，将一组需要顺序执行的函数复合为一个函数，外层函数的参数实际是内层函数的返回值。洋葱圈模型可以形象表示这种机制，是 `Koa` 源码中的精髓和难点。
+
+![洋葱圈模型](/static/onion.jpeg)
+
+
+#### 同步函数组合
+
+假设有 3 个同步函数:
+
+```js
+// compose_test.js
+function fn1() {
+  console.log('fn1')
+  console.log('fn1 end')
+}
+
+function fn2() {
+  console.log('fn2')
+  console.log('fn2 end')
+}
+
+function fn3() {
+  console.log('fn3')
+  console.log('fn3 end')
+}
+```
+
+我们如果想把三个函数组合成一个函数且按照顺序来执行，那通常的做法是这样的：
+
+```js
+// compose_test.js
+// ...
+fn3(fn2(fn1()))
+```
+执行 `node compose_test.js` 输出结果：
+
+```bash
+fn1
+fn1 end
+fn2
+fn2 end
+fn3
+fn3 end
+```
+
+当然这不能叫做是函数组合，我们期望的应该是需要一个 `compose()` 方法来帮我们进行函数组合，按如下形式来编写代码：
+
+```js
+// compose_test.js
+// ...
+const middlewares = [fn1, fn2, fn3]
+const finalFn = compose(middlewares)
+finalFn()
+```
+
+让我们来实现一下 `compose()` 函数，
+```js
+// compose_test.js
+// ...
+const compose = (middlewares) => () => {
+  [first, ...others] = middlewares
+  let ret = first()
+  others.forEach(fn => {
+    ret = fn(ret)
+  })
+  return ret
+}
+
+const middlewares = [fn1, fn2, fn3]
+const finalFn = compose(middlewares)
+finalFn()
+```
+
+可以看到我们最终得到了期望的输出结果：
+
+```bash
+fn1
+fn1 end
+fn2
+fn2 end
+fn3
+fn3 end
+```
