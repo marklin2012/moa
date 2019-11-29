@@ -326,3 +326,30 @@ fn1 end
 
 完美！！！
 
+#### 完善 Moa
+
+我们直接把刚才的异步合成代码移植到 `moa.js` 中, 由于 *koa* 中还需要用到 `ctx` 字段，所以我们还要对方法进行一些改造才能使用：
+
+```js
+// moa.js
+// ...
+class Moa {
+  // ...
+  compose(middlewares) {
+    return function (ctx) {
+      return dispatch(0)
+      function dispatch(i) {
+        let fn = middlewares[i]
+        if (!fn) {
+          return Promise.resolve()
+        }
+        return Promise.resolve(
+          fn(ctx, function () {
+            return dispatch(i + 1)
+          })
+        )
+      }
+    }
+  }
+}
+```
