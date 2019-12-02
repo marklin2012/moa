@@ -430,6 +430,7 @@ const router = new Router()
 
 router.get('/', async ctx => { ctx.body = 'index page' })
 router.get('/home', async ctx => { ctx.body = 'home page' })
+router.post('/', async ctx => { ctx.body = 'post index' })
 app.use(router.routes())
 
 // ...
@@ -439,18 +440,23 @@ app.use(router.routes())
 
 ```js
 // router.js
-
 class Router {
   constructor() {
     this.stacks = []
   }
-  get(path, callback) {
-    const route = {
-      path,
-      method: 'get',
-      route: callback
-    }
-    this.stacks.push(route)
+
+  register(path, method, middleware) {
+    this.stacks.push({
+      path, method, middleware
+    })
+  }
+
+  get(path, middleware) {
+    this.register(path, 'get', middleware)
+  }
+
+  post(path, middleware) {
+    this.register(path, 'post', middleware)
   }
 
   routes() {
@@ -461,7 +467,7 @@ class Router {
       for (let i = 0; i < this.stacks.length; i++) {
         let item = this.stacks[i]
         if (item.path === url && item.method === method) {
-          route = item.route
+          route = item.middleware
           break
         }
       }
