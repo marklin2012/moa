@@ -328,7 +328,7 @@ fn1 end
 
 #### 完善 Moa
 
-我们直接把刚才的异步合成代码移植到 `moa.js` 中, 由于 *koa* 中还需要用到 `ctx` 字段，所以我们还要对方法进行一些改造才能使用：
+我们直接把刚才的异步合成代码移植到 `moa.js` 中, 由于 *koa* 中还需要用到 `ctx` 字段，所以我们还要对 `compose()` 方法进行一些改造才能使用：
 
 ```js
 // moa.js
@@ -353,3 +353,61 @@ class Moa {
   }
 }
 ```
+
+实现完 `compose()` 方法之后我们继续完善我们的代码，首先我们需要给类在构造的时候，添加一个 `middlewares`，用来记录所有需要进行组合的函数，接着在`use()` 方法中把我们每一次调用的回调都记录一下，保存到`middlewares` 中，最后再在合适的地方调用即可：
+
+```js
+// moa.js
+// ...
+class Moa {
+  constructor() {
+    this.middlewares = []
+  }
+
+  use(middleware) {
+    this.middlewares.push(middleware)
+  }
+
+  listen(...args) {
+    const server = http.createServer(async (req, res) => {
+      // 创建上下文
+      const ctx = this.createContext(req, res)
+      const fn = this.compose(this.middlewares)
+      await fn(ctx)
+      // 响应
+      res.end(ctx.body)
+    })
+
+    server.listen(...args)
+  }
+  // ...
+}
+```
+
+我们加一小段代码测试一下: 
+
+```js
+// index.js
+//...
+const delay = () => new Promise(resolve => setTimeout(() => resolve()
+  , 2000))
+app.use(async (ctx, next) => {
+  ctx.body = "1"
+  await next()
+  ctx.body += "5"
+})
+app.use(async (ctx, next) => {
+  ctx.body += "2"
+  await delay()
+  await next()
+  ctx.body += "4"
+})
+app.use(async (ctx, next) => {
+  ctx.body += "3"
+})
+
+```
+
+运行命令 `node index.js` 启动服务器后，我们访问页面 `localhost:3000` 查看一下，发现页面显示 `12345` ！
+
+到此，我们简版的 `Koa` 就已经完成实现了。让我们庆祝一下先！！！
