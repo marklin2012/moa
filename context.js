@@ -12,6 +12,6 @@ module.exports = {
   },
 
   get method() {
-    return this.request.method
+    return this.request.method.toLowerCase()
   }
 }

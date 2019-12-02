@@ -4,6 +4,6 @@ module.exports = {
   },
 
   get method() {
-    return this.method.toLowerCase()
+    return this.req.method.toLowerCase()
   }
 }
