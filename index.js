@@ -20,22 +20,22 @@ const app = new Moa()
 //   ctx.body = 'Cool, Moa'
 // })
 
-const delay = () => Promise.resolve(resolve => setTimeout(() => resolve()
-  , 2000));
+const delay = () => new Promise(resolve => setTimeout(() => resolve()
+  , 2000))
 app.use(async (ctx, next) => {
-  ctx.body = "1";
-  await next();
-  ctx.body += "5";
-});
+  ctx.body = "1"
+  await next()
+  ctx.body += "5"
+})
 app.use(async (ctx, next) => {
-  ctx.body += "2";
-  await delay();
-  await next();
-  ctx.body += "4";
-});
+  ctx.body += "2"
+  await delay()
+  await next()
+  ctx.body += "4"
+})
 app.use(async (ctx, next) => {
-  ctx.body += "3";
-});
+  ctx.body += "3"
+})
 
 app.listen(3000, () => {
   console.log('server started at port 3000')
