@@ -16,7 +16,6 @@ class Router {
     return async (ctx, next) => {
       let url = ctx.url === '/index' ? '/' : ctx.url
       let method = ctx.method
-      console.log('method:', ctx.method, method)
       let route
       for (let i = 0; i < this.stacks.length; i++) {
         let item = this.stacks[i]
