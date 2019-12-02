@@ -411,3 +411,73 @@ app.use(async (ctx, next) => {
 运行命令 `node index.js` 启动服务器后，我们访问页面 `localhost:3000` 查看一下，发现页面显示 `12345` ！
 
 到此，我们简版的 `Koa` 就已经完成实现了。让我们庆祝一下先！！！
+
+### Router
+
+`Koa` 还有一个很重要的路由功能，感觉缺少路由就缺少了他的完整性，所以我们简单介绍下如何实现路由功能。
+
+其实，路由的原理就是根据地址和方法，调用相对应的函数即可，其核心就是要利用一张表，记录下注册的路由和方法，原理图如下所示：
+
+![路由原理](/static/table.jpeg)
+
+使用方式如下：
+
+```js
+// index.js
+// ...
+const Router = require('./router')
+const router = new Router()
+
+router.get('/', async ctx => { ctx.body = 'index page' })
+router.get('/home', async ctx => { ctx.body = 'home page' })
+app.use(router.routes())
+
+// ...
+```
+
+我们来实现下 `router` 这个类，先在根目录创建一个 `router.js` 文件，然后根据路由的原理，我们实现下代码:
+
+```js
+// router.js
+
+class Router {
+  constructor() {
+    this.stacks = []
+  }
+  get(path, callback) {
+    const route = {
+      path,
+      method: 'get',
+      route: callback
+    }
+    this.stacks.push(route)
+  }
+
+  routes() {
+    return async (ctx, next) => {
+      let url = ctx.url
+      let method = ctx.method === '/index' ? '/' : ctx.method
+      let route
+      for (let i = 0; i < this.stacks.length; i++) {
+        let item = this.stacks[i]
+        if (item.path === url && item.method === method) {
+          route = item.route
+          break
+        }
+      }
+
+      if (typeof route === 'function') {
+        await route(ctx, next)
+        return
+      }
+
+      await next()
+    }
+  }
+}
+
+module.exports = Router
+```
+
+启动服务器后，测试下 `loacalhost:3000`, 返回页面上 `index page` 表示路由实现成功！
+
