@@ -30,8 +30,8 @@ class Moa {
     ctx.request = Object.create(request)
     ctx.response = Object.create(response)
 
-    ctx.req = ctx.request = req
-    ctx.res = ctx.response = res
+    ctx.req = ctx.request.req = req
+    ctx.res = ctx.response.res = res
     return ctx
   }
 
