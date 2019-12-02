@@ -42,6 +42,8 @@ const router = new Router()
 
 router.get('/', async ctx => { ctx.body = 'index page' })
 router.get('/home', async ctx => { ctx.body = 'home page' })
+router.post('/', async ctx => { ctx.body = 'post index' })
+
 app.use(router.routes())
 
 app.listen(3000, () => {
