@@ -20,22 +20,29 @@ const app = new Moa()
 //   ctx.body = 'Cool, Moa'
 // })
 
-const delay = () => new Promise(resolve => setTimeout(() => resolve()
-  , 2000))
-app.use(async (ctx, next) => {
-  ctx.body = "1"
-  await next()
-  ctx.body += "5"
-})
-app.use(async (ctx, next) => {
-  ctx.body += "2"
-  await delay()
-  await next()
-  ctx.body += "4"
-})
-app.use(async (ctx, next) => {
-  ctx.body += "3"
-})
+// const delay = () => new Promise(resolve => setTimeout(() => resolve()
+//   , 2000))
+// app.use(async (ctx, next) => {
+//   ctx.body = "1"
+//   await next()
+//   ctx.body += "5"
+// })
+// app.use(async (ctx, next) => {
+//   ctx.body += "2"
+//   await delay()
+//   await next()
+//   ctx.body += "4"
+// })
+// app.use(async (ctx, next) => {
+//   ctx.body += "3"
+// })
+
+const Router = require('./router')
+const router = new Router()
+
+router.get('/', async ctx => { ctx.body = 'index page' })
+router.get('/home', async ctx => { ctx.body = 'home page' })
+app.use(router.routes())
 
 app.listen(3000, () => {
   console.log('server started at port 3000')
