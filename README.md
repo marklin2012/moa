@@ -296,7 +296,7 @@ finalFn()
 ```
 
 所以我们只需要改造一下 `compose()` 函数，使他支持异步函数就即可:
-
+```js
 // compose_test.js
 // ...
 
